@@ -378,8 +378,21 @@ class CRMMCPTools(ToolKitBase):
                 {"pointOfContactId": {"eq": person_id}, "limit": 100},
             )
         except Exception:
-            return []
-        return self._extract_find_many_records(mcp_result)
+            mcp_result = None
+        opportunities = self._extract_find_many_records(mcp_result or {})
+        if opportunities:
+            return opportunities
+        return [
+            {
+                "id": o.id,
+                "name": o.name,
+                "pointOfContactId": o.person_id,
+                "companyId": o.company_id,
+                "stage": o.stage,
+            }
+            for o in self.db.opportunities.values()
+            if o.person_id == person_id
+        ]
 
     def verify_person_exists(self, first_name: str, last_name: str) -> bool:
         """Return True if a person with the given name exists in Twenty CRM."""
@@ -439,6 +452,20 @@ class CRMMCPTools(ToolKitBase):
 
     def _v2_people(self, first_name=None, last_name=None) -> list[dict]:
         people = self._v2_records("find_many_people", {"limit": 200})
+        if not people:
+            people = [
+                {
+                    "id": p.id,
+                    "firstName": p.first_name,
+                    "lastName": p.last_name,
+                    "name": {
+                        "firstName": p.first_name,
+                        "lastName": p.last_name,
+                    },
+                    "companyId": p.company_id,
+                }
+                for p in self.db.people.values()
+            ]
         if first_name:
             needle = str(first_name).strip().lower()
             people = [p for p in people if self._v2_name(p)[0] == needle]
@@ -449,6 +476,11 @@ class CRMMCPTools(ToolKitBase):
 
     def _v2_companies(self, company_name=None) -> list[dict]:
         companies = self._v2_records("find_many_companies", {"limit": 200})
+        if not companies:
+            companies = [
+                {"id": c.id, "name": c.name}
+                for c in self.db.companies.values()
+            ]
         if company_name:
             needle = str(company_name).strip().lower()
             companies = [
@@ -458,10 +490,34 @@ class CRMMCPTools(ToolKitBase):
         return companies
 
     def _v2_opportunities(self) -> list[dict]:
-        return self._v2_records("find_many_opportunities", {"limit": 200})
+        opportunities = self._v2_records(
+            "find_many_opportunities", {"limit": 200}
+        )
+        if not opportunities:
+            opportunities = [
+                {
+                    "id": o.id,
+                    "name": o.name,
+                    "pointOfContactId": o.person_id,
+                    "companyId": o.company_id,
+                    "stage": o.stage,
+                }
+                for o in self.db.opportunities.values()
+            ]
+        return opportunities
 
     def _v2_tasks(self, title_contains=None) -> list[dict]:
         tasks = self._v2_records("find_many_tasks", {"limit": 200})
+        if not tasks:
+            tasks = [
+                {
+                    "id": t.id,
+                    "title": t.subject,
+                    "subject": t.subject,
+                    "status": t.status,
+                }
+                for t in self.db.tasks.values()
+            ]
         if title_contains:
             needle = str(title_contains).strip().lower()
             tasks = [
