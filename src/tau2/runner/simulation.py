@@ -10,6 +10,7 @@ from typing import Optional, Union
 from loguru import logger
 
 from tau2.data_model.simulation import (
+    DBCheck,
     EnvAssertionCheck,
     RewardInfo,
     SimulationRun,
@@ -64,6 +65,7 @@ def _evaluate_live_crm(orchestrator, task) -> RewardInfo:
 
     return RewardInfo(
         reward=reward,
+        db_check=DBCheck(db_match=(reward == 1.0), db_reward=reward),
         env_assertions=checks,
         reward_basis=task.evaluation_criteria.reward_basis,
         reward_breakdown={RewardType.ENV_ASSERTION: reward},
