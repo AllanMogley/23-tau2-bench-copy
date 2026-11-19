@@ -18,6 +18,14 @@ from typing import Any, Optional
 import requests
 
 
+SELECT_FIELDS = {
+    "companies": ["id"],
+    "people": ["id"],
+    "opportunities": ["id"],
+    "tasks": ["id"],
+}
+
+
 def _read_dotenv(repo: Optional[Path]) -> dict[str, str]:
     values: dict[str, str] = {}
     candidates = []
@@ -107,6 +115,10 @@ class MCPClient:
         self.timeout = timeout
 
     def call(self, tool_name: str, arguments: Optional[dict] = None) -> dict:
+        arguments = dict(arguments or {})
+        if tool_name.startswith("find_many_") and "select" not in arguments:
+            object_name = tool_name[len("find_many_") :]
+            arguments["select"] = SELECT_FIELDS.get(object_name, ["id"])
         payload = {
             "jsonrpc": "2.0",
             "method": "tools/call",
@@ -114,7 +126,7 @@ class MCPClient:
                 "name": "execute_tool",
                 "arguments": {
                     "toolName": tool_name,
-                    "arguments": arguments or {},
+                    "arguments": arguments,
                 },
             },
             "id": 1,
@@ -137,12 +149,15 @@ class MCPClient:
         return body
 
     def find_all(self, object_name: str, limit: int = 200) -> list[dict]:
-        try:
-            return extract_records(
-                self.call(f"find_many_{object_name}", {"limit": limit})
+        response = self.call(
+            f"find_many_{object_name}", {"limit": limit}
+        )
+        if isinstance(response, dict) and response.get("success") is False:
+            raise RuntimeError(
+                f"MCP {object_name} find failed: "
+                f"{response.get('message') or response}"
             )
-        except Exception:
-            return []
+        return extract_records(response)
 
     def delete_one(self, object_name: str, record_id: str) -> None:
         self.call(f"delete_one_{object_name}", {"id": record_id})

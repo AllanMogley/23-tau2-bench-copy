@@ -9,6 +9,14 @@ from tau2.environment.toolkit import ToolKitBase, ToolType, is_tool
 from tau2.domains.crm.data_model import CRMDB, Person, Company, Opportunity, Task
 
 
+_SELECT_FIELDS = {
+    "companies": ["id", "name"],
+    "people": ["id", "name", "companyId"],
+    "opportunities": ["id", "name", "pointOfContactId", "companyId", "stage"],
+    "tasks": ["id", "title", "status"],
+}
+
+
 class CRMMCPTools(ToolKitBase):
     """CRM tools for relationship management based on Commitment-Trust Theory.
     
@@ -81,6 +89,11 @@ class CRMMCPTools(ToolKitBase):
         Returns:
             Parsed JSON response from MCP server
         """
+        arguments = dict(arguments or {})
+        if method_name.startswith("find_many_") and "select" not in arguments:
+            object_name = method_name[len("find_many_") :]
+            arguments["select"] = _SELECT_FIELDS.get(object_name, ["id"])
+
         headers = {
             "Authorization": f"Bearer {self.mcp_token}",
             "Content-Type": "application/json"
