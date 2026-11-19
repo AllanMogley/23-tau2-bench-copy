@@ -65,6 +65,11 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=20)
     parser.add_argument("--url", default=None)
     parser.add_argument("--token", default=None)
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="skip trials whose simulation.json already exists (resume a stopped run)",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -113,20 +118,28 @@ def main() -> None:
                 run_dir = args.out / safe_name(model) / f"task_{task_id}" / f"trial_{trial + 1:02d}"
                 run_dir.mkdir(parents=True, exist_ok=True)
 
+                if args.skip_existing and (run_dir / "simulation.json").exists():
+                    print(
+                        f"skip existing {model} | T{task_id} | "
+                        f"trial {trial + 1}/{args.trials}"
+                    )
+                    continue
+
                 print(f"\n=== {model} | T{task_id} | trial {trial + 1}/{args.trials} ===")
 
                 try:
                     before = client.clean_counts()
                     if any(before.values()):
                         print("State is not clean before trial:", before)
-                        if reset_twenty(repo, args.url, args.token) != 0:
+                        if reset_twenty(
+                            repo,
+                            args.url,
+                            args.token,
+                            known_before=before,
+                        ) != 0:
                             raise RuntimeError(
                                 f"Reset reported a dirty state; before={before}"
                             )
-
-                    after_reset = client.clean_counts()
-                    if any(after_reset.values()):
-                        raise RuntimeError(f"Reset failed; state={after_reset}")
 
                     agent_data = seed_task(client, fixtures[task_id])
                     expected = {

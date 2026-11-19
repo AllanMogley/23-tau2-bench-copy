@@ -95,10 +95,22 @@ def main() -> None:
         tasks = sorted(task_map, key=lambda x: int(x) if x.isdigit() else x)
         counts = [sum(task_map[t]) for t in tasks]
         trials = [len(task_map[t]) for t in tasks]
+        expected_trials = max(trials) if trials else 0
+        incomplete = {
+            t: len(task_map[t])
+            for t in tasks
+            if len(task_map[t]) < expected_trials
+        }
+        if incomplete:
+            print(
+                f"  WARNING: incomplete trials for {incomplete} "
+                f"(expected {expected_trials}); pass^k denominators differ"
+            )
         model_summary = {
             "tasks": tasks,
             "successes": counts,
             "trials": trials,
+            "incomplete_tasks": incomplete,
             "pass": {},
         }
         for k in args.k:

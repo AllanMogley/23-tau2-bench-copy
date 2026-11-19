@@ -99,11 +99,12 @@ def reset(
     url: str | None,
     token: str | None,
     db_url: str | None = None,
+    known_before: dict[str, int] | None = None,
 ) -> int:
     mcp_url, mcp_token = get_credentials(repo, url, token)
     client = MCPClient(mcp_url, mcp_token)
 
-    before = client.clean_counts()
+    before = known_before if known_before is not None else client.clean_counts()
     deleted = client.reset()
     after = client.clean_counts()
 
