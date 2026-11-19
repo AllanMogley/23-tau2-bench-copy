@@ -186,6 +186,19 @@ class CRMMCPTools(ToolKitBase):
         try:
             mcp_result = self._call_mcp(
                 "find_many_people",
+                {"limit": 200},
+            )
+        except Exception:
+            mcp_result = None
+        for record in self._extract_find_many_records(mcp_result or {}):
+            if not isinstance(record, dict) or not record.get("id"):
+                continue
+            record_first, record_last = self._v2_name(record)
+            if record_first == fname and record_last == lname:
+                return record["id"]
+        try:
+            mcp_result = self._call_mcp(
+                "find_many_people",
                 {
                     "name": {
                         "firstName": {"ilike": first_name},
@@ -246,6 +259,24 @@ class CRMMCPTools(ToolKitBase):
         try:
             mcp_result = self._call_mcp(
                 "find_many_opportunities",
+                {"limit": 200},
+            )
+        except Exception:
+            mcp_result = None
+        for record in self._extract_find_many_records(mcp_result or {}):
+            if not isinstance(record, dict) or not record.get("id"):
+                continue
+            if (record.get("name") or "").strip().lower() != needle:
+                continue
+            record_person = record.get("pointOfContactId") or record.get("personId")
+            if isinstance(record_person, dict):
+                record_person = record_person.get("id")
+            if person_id and record_person != person_id:
+                continue
+            return record["id"]
+        try:
+            mcp_result = self._call_mcp(
+                "find_many_opportunities",
                 {
                     "name": {"ilike": name},
                     "pointOfContactId": {"eq": person_id},
@@ -265,6 +296,19 @@ class CRMMCPTools(ToolKitBase):
         for task in self.db.tasks.values():
             if (task.subject or "").strip().lower() == needle:
                 return task.id
+        try:
+            mcp_result = self._call_mcp(
+                "find_many_tasks",
+                {"limit": 200},
+            )
+        except Exception:
+            mcp_result = None
+        for record in self._extract_find_many_records(mcp_result or {}):
+            if not isinstance(record, dict) or not record.get("id"):
+                continue
+            title = (record.get("title") or record.get("subject") or "").strip().lower()
+            if title == needle:
+                return record["id"]
         try:
             mcp_result = self._call_mcp(
                 "find_many_tasks",
@@ -682,10 +726,12 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 person_id = mcp_result["result"].get("id")
             else:
-                raise RuntimeError(
-                    "MCP create_one_person failed: "
-                    f"{mcp_result.get('message') or mcp_result}"
-                )
+                person_id = self._find_existing_person_id(first_name, last_name)
+                if not person_id:
+                    raise RuntimeError(
+                        "MCP create_one_person failed: "
+                        f"{mcp_result.get('message') or mcp_result}"
+                    )
         
         # Create local record with MCP data
         person = Person(
@@ -851,10 +897,12 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 opportunity_id = mcp_result["result"].get("id")
             else:
-                raise RuntimeError(
-                    "MCP create_one_opportunity failed: "
-                    f"{mcp_result.get('message') or mcp_result}"
-                )
+                opportunity_id = self._find_existing_opportunity_id(name, person_id)
+                if not opportunity_id:
+                    raise RuntimeError(
+                        "MCP create_one_opportunity failed: "
+                        f"{mcp_result.get('message') or mcp_result}"
+                    )
         
         opportunity = Opportunity(
             id=opportunity_id,
@@ -932,10 +980,12 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 task_id = mcp_result["result"].get("id")
             else:
-                raise RuntimeError(
-                    "MCP create_one_task failed: "
-                    f"{mcp_result.get('message') or mcp_result}"
-                )
+                task_id = self._find_existing_task_id(subject)
+                if not task_id:
+                    raise RuntimeError(
+                        "MCP create_one_task failed: "
+                        f"{mcp_result.get('message') or mcp_result}"
+                    )
         
         task = Task(
             id=task_id,
