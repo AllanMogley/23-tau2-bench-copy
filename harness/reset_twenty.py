@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
@@ -29,22 +30,68 @@ def get_db_url(repo: Path | None) -> str | None:
 
 def reset_sql(repo: Path | None, db_url: str | None = None) -> int:
     url = db_url or get_db_url(repo)
-    if not url:
+    psql_cmd = os.environ.get("TWENTY_PSQL_CMD")
+    if not url and not psql_cmd:
         print(
             "No Postgres URL found. Set TWENTY_DB_URL, DATABASE_URL or "
-            "PG_DATABASE_URL, or pass --db-url."
+            "PG_DATABASE_URL, pass --db-url, or set TWENTY_PSQL_CMD."
         )
         return 1
-    psql = shutil.which("psql")
-    if not psql:
-        print("psql not found on PATH; cannot run the hard SQL reset.")
-        return 1
+
     sql_file = Path(__file__).with_name("reset_twenty.sql")
-    print("Running hard SQL reset...")
-    result = subprocess.run(
-        [psql, url, "-v", "ON_ERROR_STOP=1", "-f", str(sql_file)]
+    sql = sql_file.read_text()
+    target = url.rsplit("@", 1)[-1] if url else "TWENTY_PSQL_CMD"
+
+    if psql_cmd:
+        print("Running hard SQL reset via TWENTY_PSQL_CMD...")
+        result = subprocess.run(
+            shlex.split(psql_cmd), input=sql, text=True
+        )
+        if result.returncode != 0:
+            print(f"psql command exited with code {result.returncode}")
+        return result.returncode
+
+    psql = shutil.which("psql")
+    if psql:
+        print(f"Running hard SQL reset against {target}...")
+        result = subprocess.run(
+            [psql, url, "-v", "ON_ERROR_STOP=1"],
+            input=sql,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"psql exited with code {result.returncode}")
+        return result.returncode
+
+    try:
+        import psycopg2
+    except ImportError:
+        psycopg2 = None
+    if psycopg2 is not None:
+        print(f"Running hard SQL reset against {target} with psycopg2...")
+        with psycopg2.connect(url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+        return 0
+
+    try:
+        import psycopg
+    except ImportError:
+        psycopg = None
+    if psycopg is not None:
+        print(f"Running hard SQL reset against {target} with psycopg...")
+        with psycopg.connect(url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+        return 0
+
+    print("psql not found and no Python Postgres driver is installed.")
+    print("Install postgresql-client, or run: pip install psycopg2-binary")
+    print(
+        "Or set TWENTY_PSQL_CMD, for example: "
+        "docker exec -i <db-container> psql -U postgres -d default"
     )
-    return result.returncode
+    return 1
 
 
 def reset(
