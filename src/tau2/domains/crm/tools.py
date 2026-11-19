@@ -214,6 +214,18 @@ class CRMMCPTools(ToolKitBase):
         try:
             mcp_result = self._call_mcp(
                 "find_many_companies",
+                {"limit": 200},
+            )
+        except Exception:
+            mcp_result = None
+        for record in self._extract_find_many_records(mcp_result or {}):
+            if not isinstance(record, dict) or not record.get("id"):
+                continue
+            if (record.get("name") or "").strip().lower() == needle:
+                return record["id"]
+        try:
+            mcp_result = self._call_mcp(
+                "find_many_companies",
                 {"name": {"ilike": name}, "limit": 1},
             )
         except Exception:
@@ -774,7 +786,12 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 company_id = mcp_result["result"].get("id")
             else:
-                company_id = self._get_new_company_id()
+                company_id = self._find_existing_company_id(name)
+                if not company_id:
+                    raise RuntimeError(
+                        "MCP create_one_company failed: "
+                        f"{mcp_result.get('message') or mcp_result}"
+                    )
         
         company = Company(
             id=company_id,
