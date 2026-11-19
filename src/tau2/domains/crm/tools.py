@@ -3,6 +3,7 @@
 import os
 import json
 import requests
+from loguru import logger
 from typing import Optional
 from tau2.environment.toolkit import ToolKitBase, ToolType, is_tool
 from tau2.domains.crm.data_model import CRMDB, Person, Company, Opportunity, Task
@@ -157,18 +158,46 @@ class CRMMCPTools(ToolKitBase):
     @staticmethod
     def _extract_find_many_records(mcp_result: dict) -> list[dict]:
         """Extract the record list from a find_many_* MCP response."""
-        if not isinstance(mcp_result, dict):
-            return []
-        for key in ("result", "records", "data", "items", "results"):
-            value = mcp_result.get(key)
+        seen: set[int] = set()
+        preferred = (
+            "result",
+            "records",
+            "data",
+            "items",
+            "results",
+            "list",
+            "nodes",
+            "edges",
+            "people",
+            "companies",
+            "opportunities",
+            "tasks",
+        )
+        skip = {"content", "jsonrpc", "error", "success", "message", "id"}
+
+        def walk(value):
+            if isinstance(value, (dict, list)):
+                if id(value) in seen:
+                    return []
+                seen.add(id(value))
             if isinstance(value, list):
-                return value
-            if isinstance(value, dict):
-                for subkey in ("records", "data", "items", "results"):
-                    subvalue = value.get(subkey)
-                    if isinstance(subvalue, list):
-                        return subvalue
-        return []
+                return [item for item in value if isinstance(item, dict)]
+            if not isinstance(value, dict):
+                return []
+            for key in preferred:
+                if key in value:
+                    found = walk(value[key])
+                    if found:
+                        return found
+            for key, item in value.items():
+                if key in skip:
+                    continue
+                found = walk(item)
+                if found:
+                    return found
+            return []
+
+        return walk(mcp_result)
 
     def _find_existing_person_id(self, first_name: str, last_name: str) -> Optional[str]:
         """Find an existing person by first+last name (case-insensitive).
@@ -404,7 +433,8 @@ class CRMMCPTools(ToolKitBase):
         try:
             result = self._call_mcp(tool_name, arguments or {})
             return self._extract_find_many_records(result)
-        except Exception:
+        except Exception as exc:
+            logger.warning(f"MCP read {tool_name} failed: {exc}")
             return []
 
     def _v2_people(self, first_name=None, last_name=None) -> list[dict]:
