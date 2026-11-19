@@ -98,7 +98,9 @@ class CRMMCPTools(ToolKitBase):
             "id": 1
         }
         
-        response = requests.post(self.mcp_url, json=payload, headers=headers)
+        response = requests.post(
+            self.mcp_url, json=payload, headers=headers, timeout=120
+        )
         response.raise_for_status()
         
         result = response.json()
