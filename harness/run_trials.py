@@ -139,6 +139,23 @@ def main() -> None:
                     }
                     seeded = client.clean_counts()
                     if seeded != expected:
+                        for object_name in (
+                            "companies",
+                            "people",
+                            "opportunities",
+                            "tasks",
+                        ):
+                            try:
+                                raw = client.call(
+                                    f"find_many_{object_name}", {"limit": 5}
+                                )
+                                print(
+                                    f"RAW find_many_{object_name}: {str(raw)[:1000]}"
+                                )
+                            except Exception as exc:
+                                print(
+                                    f"RAW find_many_{object_name} ERROR: {exc}"
+                                )
                         raise RuntimeError(
                             f"Seed count mismatch; got {seeded}, expected {expected}"
                         )
