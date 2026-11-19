@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -109,10 +110,24 @@ def extract_records(response: Any) -> list[dict]:
 
 
 class MCPClient:
-    def __init__(self, url: str, token: str, timeout: int = 60) -> None:
+    def __init__(
+        self,
+        url: str,
+        token: str,
+        timeout: int = 60,
+        min_interval: float = 0.7,
+        max_retries: int = 5,
+        retry_wait: int = 60,
+    ) -> None:
         self.url = url
         self.token = token
         self.timeout = timeout
+        self.min_interval = float(
+            os.environ.get("TWENTY_MIN_INTERVAL", min_interval)
+        )
+        self.max_retries = int(os.environ.get("TWENTY_MAX_RETRIES", max_retries))
+        self.retry_wait = int(os.environ.get("TWENTY_RETRY_WAIT", retry_wait))
+        self._last_call = 0.0
 
     def call(self, tool_name: str, arguments: Optional[dict] = None) -> dict:
         arguments = dict(arguments or {})
@@ -135,18 +150,51 @@ class MCPClient:
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
         }
-        response = requests.post(
-            self.url, json=payload, headers=headers, timeout=self.timeout
-        )
-        response.raise_for_status()
-        body = response.json()
-        if "result" in body and "content" in body["result"]:
-            text = body["result"]["content"][0].get("text", "{}")
-            try:
-                return json.loads(text)
-            except json.JSONDecodeError:
-                return {"raw": text}
-        return body
+
+        parsed: Any = {}
+        for attempt in range(1, self.max_retries + 1):
+            wait = self.min_interval - (time.monotonic() - self._last_call)
+            if wait > 0:
+                time.sleep(wait)
+
+            response = requests.post(
+                self.url, json=payload, headers=headers, timeout=self.timeout
+            )
+            self._last_call = time.monotonic()
+
+            if response.status_code == 429 and attempt < self.max_retries:
+                print(
+                    f"MCP HTTP 429 on {tool_name}; sleeping {self.retry_wait}s "
+                    f"(attempt {attempt}/{self.max_retries})"
+                )
+                time.sleep(self.retry_wait)
+                continue
+            response.raise_for_status()
+
+            body = response.json()
+            parsed = body
+            if "result" in body and "content" in body["result"]:
+                text = body["result"]["content"][0].get("text", "{}")
+                try:
+                    parsed = json.loads(text)
+                except json.JSONDecodeError:
+                    parsed = {"raw": text}
+
+            limited = (
+                isinstance(parsed, dict)
+                and parsed.get("success") is False
+                and "limit reached" in str(parsed.get("message", "")).lower()
+            )
+            if limited and attempt < self.max_retries:
+                print(
+                    f"MCP rate limit on {tool_name}; sleeping {self.retry_wait}s "
+                    f"(attempt {attempt}/{self.max_retries})"
+                )
+                time.sleep(self.retry_wait)
+                continue
+            return parsed
+
+        return parsed
 
     def find_all(self, object_name: str, limit: int = 200) -> list[dict]:
         response = self.call(
