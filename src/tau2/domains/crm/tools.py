@@ -331,6 +331,119 @@ class CRMMCPTools(ToolKitBase):
                 return person.trust_level is not None and person.trust_level < max_trust
         return False
 
+    # --- v2 strict verifiers ---
+
+    @staticmethod
+    def _v2_name(record: dict) -> tuple[str, str]:
+        name = record.get("name") or {}
+        if not isinstance(name, dict):
+            name = {}
+        first = record.get("firstName") or name.get("firstName") or ""
+        last = record.get("lastName") or name.get("lastName") or ""
+        return (first or "").strip().lower(), (last or "").strip().lower()
+
+    def _v2_records(self, tool_name: str, arguments: dict | None = None) -> list[dict]:
+        try:
+            result = self._call_mcp(tool_name, arguments or {})
+            return self._extract_find_many_records(result)
+        except Exception:
+            return []
+
+    def _v2_people(self, first_name=None, last_name=None) -> list[dict]:
+        people = self._v2_records("find_many_people", {"limit": 200})
+        if first_name:
+            needle = str(first_name).strip().lower()
+            people = [p for p in people if self._v2_name(p)[0] == needle]
+        if last_name:
+            needle = str(last_name).strip().lower()
+            people = [p for p in people if self._v2_name(p)[1] == needle]
+        return people
+
+    def _v2_companies(self, company_name=None) -> list[dict]:
+        companies = self._v2_records("find_many_companies", {"limit": 200})
+        if company_name:
+            needle = str(company_name).strip().lower()
+            companies = [
+                c for c in companies
+                if (c.get("name") or "").strip().lower() == needle
+            ]
+        return companies
+
+    def _v2_opportunities(self) -> list[dict]:
+        return self._v2_records("find_many_opportunities", {"limit": 200})
+
+    def _v2_tasks(self, title_contains=None) -> list[dict]:
+        tasks = self._v2_records("find_many_tasks", {"limit": 200})
+        if title_contains:
+            needle = str(title_contains).strip().lower()
+            tasks = [
+                t for t in tasks
+                if needle in (t.get("title") or t.get("subject") or "").strip().lower()
+            ]
+        return tasks
+
+    def verify_person_named_company(
+        self, first_name: str, last_name: str, company_name: str
+    ) -> bool:
+        people = self._v2_people(first_name, last_name)
+        if len(people) != 1:
+            return False
+        company_id = people[0].get("companyId")
+        if isinstance(company_id, dict):
+            company_id = company_id.get("id")
+        if not company_id:
+            company = people[0].get("company") or {}
+            if isinstance(company, dict):
+                company_id = company.get("id")
+        if not company_id:
+            return False
+        companies = self._v2_companies(company_name)
+        return any(c.get("id") == company_id for c in companies)
+
+    def verify_opportunity_named(
+        self, first_name: str, last_name: str, name_contains: str
+    ) -> bool:
+        people = self._v2_people(first_name, last_name)
+        if len(people) != 1:
+            return False
+        opportunities = self._find_opportunities_in_twenty(people[0]["id"])
+        needle = (name_contains or "").strip().lower()
+        return any(
+            needle in (o.get("name") or "").strip().lower()
+            for o in opportunities
+        )
+
+    def verify_task_named(self, title_contains: str) -> bool:
+        return len(self._v2_tasks(title_contains)) >= 1
+
+    def verify_people_total(self, count: int) -> bool:
+        return len(self._v2_people()) == count
+
+    def verify_opportunities_total(self, count: int) -> bool:
+        return len(self._v2_opportunities()) == count
+
+    def verify_tasks_total(self, count: int) -> bool:
+        return len(self._v2_tasks()) == count
+
+    def verify_person_count(self, first_name: str, last_name: str, count: int) -> bool:
+        return len(self._v2_people(first_name, last_name)) == count
+
+    def verify_opportunity_count(
+        self, first_name: str, last_name: str, count: int
+    ) -> bool:
+        people = self._v2_people(first_name, last_name)
+        if len(people) != 1:
+            return False
+        return len(self._find_opportunities_in_twenty(people[0]["id"])) == count
+
+    def verify_clean_state(self) -> bool:
+        return (
+            len(self._v2_people()) == 0
+            and len(self._v2_companies()) == 0
+            and len(self._v2_opportunities()) == 0
+            and len(self._v2_tasks()) == 0
+        )
+
     def _get_person(self, person_id: str) -> Person:
         """Get person from database."""
         if person_id not in self.db.people:
@@ -555,8 +668,10 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 person_id = mcp_result["result"].get("id")
             else:
-                # Fallback to local ID if MCP fails
-                person_id = self._get_new_person_id()
+                raise RuntimeError(
+                    "MCP create_one_person failed: "
+                    f"{mcp_result.get('message') or mcp_result}"
+                )
         
         # Create local record with MCP data
         person = Person(
@@ -717,7 +832,10 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 opportunity_id = mcp_result["result"].get("id")
             else:
-                opportunity_id = self._get_new_opportunity_id()
+                raise RuntimeError(
+                    "MCP create_one_opportunity failed: "
+                    f"{mcp_result.get('message') or mcp_result}"
+                )
         
         opportunity = Opportunity(
             id=opportunity_id,
@@ -754,9 +872,8 @@ class CRMMCPTools(ToolKitBase):
                 "id": opportunity_id,
                 "stage": self._map_stage(stage)
             })
-        except Exception:
-            # MCP update failed, but local update succeeded
-            pass
+        except Exception as exc:
+            raise RuntimeError(f"MCP update failed: {exc}") from exc
         
         return opportunity
     
@@ -796,7 +913,10 @@ class CRMMCPTools(ToolKitBase):
             if mcp_result.get("success") and "result" in mcp_result:
                 task_id = mcp_result["result"].get("id")
             else:
-                task_id = self._get_new_task_id()
+                raise RuntimeError(
+                    "MCP create_one_task failed: "
+                    f"{mcp_result.get('message') or mcp_result}"
+                )
         
         task = Task(
             id=task_id,
@@ -831,9 +951,8 @@ class CRMMCPTools(ToolKitBase):
                 "id": task_id,
                 "status": self._map_task_status(status)
             })
-        except Exception:
-            # MCP update failed, but local update succeeded
-            pass
+        except Exception as exc:
+            raise RuntimeError(f"MCP update failed: {exc}") from exc
         
         return task
     
