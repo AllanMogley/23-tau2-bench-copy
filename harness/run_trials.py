@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import shutil
 import sys
 import traceback
 from pathlib import Path
@@ -70,6 +71,14 @@ def main() -> None:
         action="store_true",
         help="skip trials whose simulation.json already exists (resume a stopped run)",
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help=(
+            "skip tasks that already have all trials; re-run an incomplete "
+            "task from scratch (clears its folder)"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -112,6 +121,21 @@ def main() -> None:
 
     for model in models:
         for task_id in task_ids:
+            task_dir = args.out / safe_name(model) / f"task_{task_id}"
+            if args.resume and task_dir.exists():
+                done = len(list(task_dir.glob("trial_*/simulation.json")))
+                if done >= args.trials:
+                    print(
+                        f"skip complete task {model} | T{task_id} "
+                        f"({done}/{args.trials})"
+                    )
+                    continue
+                print(
+                    f"incomplete task {model} | T{task_id} "
+                    f"({done}/{args.trials}); rerunning from scratch"
+                )
+                shutil.rmtree(task_dir)
+
             for trial in range(args.trials):
                 seed = args.seed_base + trial
                 user_seed = args.user_seed_base + trial
