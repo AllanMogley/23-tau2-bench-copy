@@ -81,6 +81,7 @@ def run_simulation(
         domain=domain,
         mode=mode,
         env_kwargs=env_kwargs,
+        strict_replay=(domain != "crm"),
     )
     simulation.reward_info = reward_info
 
