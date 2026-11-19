@@ -119,13 +119,29 @@ def main() -> None:
                     before = client.clean_counts()
                     if any(before.values()):
                         print("State is not clean before trial:", before)
-                        reset_twenty(repo, args.url, args.token)
+                        if reset_twenty(repo, args.url, args.token) != 0:
+                            raise RuntimeError(
+                                f"Reset reported a dirty state; before={before}"
+                            )
 
                     after_reset = client.clean_counts()
                     if any(after_reset.values()):
                         raise RuntimeError(f"Reset failed; state={after_reset}")
 
                     agent_data = seed_task(client, fixtures[task_id])
+                    expected = {
+                        "companies": len(fixtures[task_id].get("companies", [])),
+                        "people": len(fixtures[task_id].get("people", [])),
+                        "opportunities": len(
+                            fixtures[task_id].get("opportunities", [])
+                        ),
+                        "tasks": len(fixtures[task_id].get("tasks", [])),
+                    }
+                    seeded = client.clean_counts()
+                    if seeded != expected:
+                        raise RuntimeError(
+                            f"Seed count mismatch; got {seeded}, expected {expected}"
+                        )
 
                     task_dict = copy.deepcopy(tasks[task_id])
                     task_dict["initial_state"] = {

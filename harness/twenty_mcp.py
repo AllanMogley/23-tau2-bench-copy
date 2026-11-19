@@ -58,18 +58,46 @@ def get_credentials(
 
 
 def extract_records(response: Any) -> list[dict]:
-    if not isinstance(response, dict):
-        return []
-    for key in ("result", "records", "data", "items", "results"):
-        value = response.get(key)
+    seen: set[int] = set()
+    preferred = (
+        "result",
+        "records",
+        "data",
+        "items",
+        "results",
+        "list",
+        "nodes",
+        "edges",
+        "people",
+        "companies",
+        "opportunities",
+        "tasks",
+    )
+    skip = {"content", "jsonrpc", "error", "success", "message", "id"}
+
+    def walk(value: Any) -> list[dict]:
+        if isinstance(value, (dict, list)):
+            if id(value) in seen:
+                return []
+            seen.add(id(value))
         if isinstance(value, list):
-            return [x for x in value if isinstance(x, dict)]
-        if isinstance(value, dict):
-            for subkey in ("records", "data", "items", "results"):
-                subvalue = value.get(subkey)
-                if isinstance(subvalue, list):
-                    return [x for x in subvalue if isinstance(x, dict)]
-    return []
+            return [item for item in value if isinstance(item, dict)]
+        if not isinstance(value, dict):
+            return []
+        for key in preferred:
+            if key in value:
+                found = walk(value[key])
+                if found:
+                    return found
+        for key, item in value.items():
+            if key in skip:
+                continue
+            found = walk(item)
+            if found:
+                return found
+        return []
+
+    return walk(response)
 
 
 class MCPClient:
