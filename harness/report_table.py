@@ -3,9 +3,11 @@
 
 Usage:
     python harness/report_table.py --runs harness/runs_v2
+    python harness/report_table.py --runs harness/runs_v2 --out task_table.md
 
 Reads every */task_*/trial_*/simulation.json, computes per-task successes,
-pass^1/pass^4/pass^8 and failure reasons, and prints a Markdown table.
+pass^1/pass^4/pass^8 and failure reasons. Prints Markdown and, with --out,
+writes it to a file.
 """
 
 from __future__ import annotations
@@ -59,6 +61,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=Path, default=HERE / "runs_v2")
     parser.add_argument("--model", default=None, help="only this model directory")
+    parser.add_argument("--out", type=Path, default=None, help="write Markdown here")
     args = parser.parse_args()
 
     records: dict[str, dict[str, list[tuple[int, str]]]] = collections.defaultdict(
@@ -79,6 +82,12 @@ def main() -> None:
         reason = data.get("termination_reason") or "unknown"
         records[model][task].append((reward, reason))
 
+    lines: list[str] = []
+
+    def emit(text: str = "") -> None:
+        print(text)
+        lines.append(text)
+
     rng = random.Random(SEED)
     for model in sorted(records):
         task_map = records[model]
@@ -86,18 +95,17 @@ def main() -> None:
         counts = [sum(r for r, _ in task_map[t]) for t in tasks]
         trials = [len(task_map[t]) for t in tasks]
 
-        print(f"\n### {model}\n")
-        print("| Task | Scenario | Required CRM outcome | Success | pass^1 | pass^4 | pass^8 | Failed trials |")
-        print("|---|---|---|---:|---:|---:|---:|---|")
+        emit(f"### {model}")
+        emit()
+        emit("| Task | Scenario | Required CRM outcome | Success | pass^1 | pass^4 | pass^8 | Failed trials |")
+        emit("|---|---|---|---:|---:|---:|---:|---|")
         for index, task in enumerate(tasks):
-            label, scenario, outcome = PAPER.get(
-                task, (f"T{task}", "", "")
-            )
+            label, scenario, outcome = PAPER.get(task, (f"T{task}", "", ""))
             s, n = counts[index], trials[index]
             reasons = collections.Counter(
                 r for reward, r in task_map[task] if reward == 0
             )
-            print(
+            emit(
                 f"| {label} | {scenario} | {outcome} | {s}/{n} | "
                 f"{pct(s / n, 1) if n else '-'} | "
                 f"{pct(pass_k(s, n, 4))} | {pct(pass_k(s, n, 8))} | "
@@ -105,24 +113,32 @@ def main() -> None:
             )
 
         total_s, total_n = sum(counts), sum(trials)
-        print(
+        emit(
             f"| **All tasks** | | | **{total_s}/{total_n}** | "
             f"**{pct(mean_pass_k(counts, trials, 1), 1)}** | "
             f"**{pct(mean_pass_k(counts, trials, 4))}** | "
             f"**{pct(mean_pass_k(counts, trials, 8))}** | |"
         )
 
-        print("\nModel-level 95% task-cluster bootstrap CIs:")
+        emit()
+        emit("Model-level 95% task-cluster bootstrap CIs:")
         for k in (1, 4, 8):
             value = mean_pass_k(counts, trials, k)
             lo, hi = bootstrap_ci(counts, trials, k, rng)
-            print(f"- pass^{k}: {pct(value)}  CI [{100 * lo:.2f}, {100 * hi:.2f}]")
+            emit(f"- pass^{k}: {pct(value)}  CI [{100 * lo:.2f}, {100 * hi:.2f}]")
 
         incomplete = {
             t: len(task_map[t]) for t in tasks if len(task_map[t]) < max(trials)
         }
         if incomplete:
-            print(f"\nWARNING: incomplete tasks: {incomplete}")
+            emit()
+            emit(f"WARNING: incomplete tasks: {incomplete}")
+        emit()
+
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text("\n".join(lines).rstrip() + "\n")
+        print(f"Wrote {args.out}")
 
 
 if __name__ == "__main__":
