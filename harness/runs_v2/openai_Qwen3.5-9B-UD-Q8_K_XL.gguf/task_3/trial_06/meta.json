@@ -1,0 +1,44 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "3",
+ "trial": 6,
+ "seed": 4247,
+ "user_seed": 9247,
+ "agent_args": {
+  "seed": 4247,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9247,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "ba77c2bf-bb16-4606-8f02-2ba381349a0a": {
+    "id": "ba77c2bf-bb16-4606-8f02-2ba381349a0a",
+    "name": "ScaleUp Inc",
+    "industry": "Logistics",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {},
+  "opportunities": {},
+  "tasks": {}
+ }
+}

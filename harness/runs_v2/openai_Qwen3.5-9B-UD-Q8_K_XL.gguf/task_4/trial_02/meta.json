@@ -1,0 +1,44 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "4",
+ "trial": 2,
+ "seed": 4243,
+ "user_seed": 9243,
+ "agent_args": {
+  "seed": 4243,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9243,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "015f00e5-4279-45da-88b3-19491bb61019": {
+    "id": "015f00e5-4279-45da-88b3-19491bb61019",
+    "name": "Midway Corp",
+    "industry": "Retail",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {},
+  "opportunities": {},
+  "tasks": {}
+ }
+}

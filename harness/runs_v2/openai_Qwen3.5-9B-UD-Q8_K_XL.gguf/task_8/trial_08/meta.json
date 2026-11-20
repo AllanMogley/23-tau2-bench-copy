@@ -1,0 +1,69 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "8",
+ "trial": 8,
+ "seed": 4249,
+ "user_seed": 9249,
+ "agent_args": {
+  "seed": 4249,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9249,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "0f22303a-c5c3-4bfb-8a97-7e134165f904": {
+    "id": "0f22303a-c5c3-4bfb-8a97-7e134165f904",
+    "name": "Enterprise Co",
+    "industry": "Media",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {
+   "a7ad0823-3354-41ee-b6ea-d53db6a0bc24": {
+    "id": "a7ad0823-3354-41ee-b6ea-d53db6a0bc24",
+    "first_name": "Rachel",
+    "last_name": "Brown",
+    "email": null,
+    "phone": null,
+    "job_title": "VP Operations",
+    "company_id": "0f22303a-c5c3-4bfb-8a97-7e134165f904",
+    "lead_score": 0,
+    "relationship_stage": "prospect",
+    "trust_level": 50,
+    "commitment_level": 0
+   }
+  },
+  "opportunities": {
+   "611fc733-49bb-4cf2-a450-3a813d75477a": {
+    "id": "611fc733-49bb-4cf2-a450-3a813d75477a",
+    "name": "Enterprise Co Subscription",
+    "person_id": "a7ad0823-3354-41ee-b6ea-d53db6a0bc24",
+    "company_id": "0f22303a-c5c3-4bfb-8a97-7e134165f904",
+    "stage": "CUSTOMER",
+    "value": null,
+    "probability": 0.1,
+    "expected_close_date": null
+   }
+  },
+  "tasks": {}
+ }
+}

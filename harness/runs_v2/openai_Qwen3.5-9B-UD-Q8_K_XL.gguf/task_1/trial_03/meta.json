@@ -1,0 +1,44 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "1",
+ "trial": 3,
+ "seed": 4244,
+ "user_seed": 9244,
+ "agent_args": {
+  "seed": 4244,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9244,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "43a75444-5342-42f5-86c8-bd4c643936bb": {
+    "id": "43a75444-5342-42f5-86c8-bd4c643936bb",
+    "name": "Enterprise Corp",
+    "industry": "Manufacturing",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {},
+  "opportunities": {},
+  "tasks": {}
+ }
+}

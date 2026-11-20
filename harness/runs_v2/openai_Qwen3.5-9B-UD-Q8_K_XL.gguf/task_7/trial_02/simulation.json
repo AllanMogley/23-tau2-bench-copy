@@ -1,0 +1,838 @@
+{
+ "id": "64ced345-0aff-428c-a627-837bfd3f18b6",
+ "task_id": "7",
+ "timestamp": "2026-11-20T00:32:43.512596",
+ "start_time": "2026-11-20T00:32:29.186598",
+ "end_time": "2026-11-20T00:32:43.512584",
+ "duration": 14.324430788867176,
+ "termination_reason": "user_stop",
+ "agent_cost": 0.0,
+ "user_cost": 0.0,
+ "agent_usage": null,
+ "reward_info": {
+  "reward": 1.0,
+  "db_check": {
+   "db_match": true,
+   "db_reward": 1.0
+  },
+  "env_assertions": [
+   {
+    "env_assertion": {
+     "env_type": "assistant",
+     "func_name": "verify_person_exists",
+     "arguments": {
+      "first_name": "Alex",
+      "last_name": "Thompson"
+     },
+     "assert_value": true,
+     "message": null
+    },
+    "met": true,
+    "reward": 1.0
+   },
+   {
+    "env_assertion": {
+     "env_type": "assistant",
+     "func_name": "verify_person_named_company",
+     "arguments": {
+      "first_name": "Alex",
+      "last_name": "Thompson",
+      "company_name": "Success LLC"
+     },
+     "assert_value": true,
+     "message": null
+    },
+    "met": true,
+    "reward": 1.0
+   },
+   {
+    "env_assertion": {
+     "env_type": "assistant",
+     "func_name": "verify_opportunity_named",
+     "arguments": {
+      "first_name": "Alex",
+      "last_name": "Thompson",
+      "name_contains": "Success LLC Referral"
+     },
+     "assert_value": true,
+     "message": null
+    },
+    "met": true,
+    "reward": 1.0
+   },
+   {
+    "env_assertion": {
+     "env_type": "assistant",
+     "func_name": "verify_people_total",
+     "arguments": {
+      "count": 1
+     },
+     "assert_value": true,
+     "message": null
+    },
+    "met": true,
+    "reward": 1.0
+   },
+   {
+    "env_assertion": {
+     "env_type": "assistant",
+     "func_name": "verify_opportunities_total",
+     "arguments": {
+      "count": 1
+     },
+     "assert_value": true,
+     "message": null
+    },
+    "met": true,
+    "reward": 1.0
+   }
+  ],
+  "action_checks": null,
+  "nl_assertions": null,
+  "communicate_checks": null,
+  "reward_basis": [
+   "ENV_ASSERTION"
+  ],
+  "reward_breakdown": {
+   "ENV_ASSERTION": 1.0
+  },
+  "info": {
+   "note": "Evaluated live CRM environment; replay skipped"
+  }
+ },
+ "messages": [
+  {
+   "role": "assistant",
+   "content": "Hi! How can I help you today?",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 0,
+   "timestamp": "2026-11-20T00:32:29.187120",
+   "cost": 0.0,
+   "usage": null,
+   "raw_data": null,
+   "generation_time_seconds": null,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "user",
+   "content": "Hi there! I'm Alex Thompson, the Manager at Success LLC. I've really enjoyed using your CRM and have been looking for ways to recommend it to my colleagues. Before I start making those introductions, I wanted to check out your referral program to make sure the process is smooth for everyone involved. Could you help me set up a referral opportunity named 'Success LLC Referral'?",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 1,
+   "timestamp": "2026-11-20T00:32:30.162962",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 78,
+    "prompt_tokens": 477
+   },
+   "raw_data": {
+    "id": "chatcmpl-KaVVJPmzq0OvMRzb50rgqKxBF8j6sWNp",
+    "created": 1795131150,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "Hi there! I'm Alex Thompson, the Manager at Success LLC. I've really enjoyed using your CRM and have been looking for ways to recommend it to my colleagues. Before I start making those introductions, I wanted to check out your referral program to make sure the process is smooth for everyone involved. Could you help me set up a referral opportunity named 'Success LLC Referral'?",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 78,
+     "prompt_tokens": 477,
+     "total_tokens": 555,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 473
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 473,
+     "prompt_n": 4,
+     "prompt_ms": 34.855,
+     "prompt_per_token_ms": 8.71375,
+     "prompt_per_second": 114.76115334959117,
+     "predicted_n": 78,
+     "predicted_ms": 868.419,
+     "predicted_per_token_ms": 11.27816883116883,
+     "predicted_per_second": 88.66687624291961
+    }
+   },
+   "generation_time_seconds": null,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "assistant",
+   "content": "I'd be happy to help you set up a referral opportunity! First, let me check if you're already in our system as a person record, and then I can create the opportunity for you.\n\nLet me search for your record first:\n\n",
+   "tool_calls": [
+    {
+     "id": "kOfOyQ1j9M9zoR1SDu1XMYsEnZXZdtTe",
+     "name": "find_people",
+     "arguments": {
+      "first_name": "Alex",
+      "last_name": "Thompson"
+     },
+     "requestor": "assistant"
+    }
+   ],
+   "is_audio": false,
+   "turn_idx": 2,
+   "timestamp": "2026-11-20T00:32:31.275708",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 91,
+    "prompt_tokens": 4732
+   },
+   "raw_data": {
+    "id": "chatcmpl-NSQl0esrnVwfxdcOayoLh70Us5VVr7iQ",
+    "created": 1795131151,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "tool_calls",
+      "index": 0,
+      "message": {
+       "content": "I'd be happy to help you set up a referral opportunity! First, let me check if you're already in our system as a person record, and then I can create the opportunity for you.\n\nLet me search for your record first:\n\n",
+       "role": "assistant",
+       "tool_calls": [
+        {
+         "function": {
+          "arguments": "{\"first_name\":\"Alex\",\"last_name\":\"Thompson\"}",
+          "name": "find_people"
+         },
+         "id": "kOfOyQ1j9M9zoR1SDu1XMYsEnZXZdtTe",
+         "type": "function"
+        }
+       ],
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 91,
+     "prompt_tokens": 4732,
+     "total_tokens": 4823,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 4728
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 4728,
+     "prompt_n": 4,
+     "prompt_ms": 32.154,
+     "prompt_per_token_ms": 8.0385,
+     "prompt_per_second": 124.40131865397773,
+     "predicted_n": 91,
+     "predicted_ms": 995.817,
+     "predicted_per_token_ms": 11.064633333333333,
+     "predicted_per_second": 90.37805138896003
+    }
+   },
+   "generation_time_seconds": 1.1063014972023666,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "id": "kOfOyQ1j9M9zoR1SDu1XMYsEnZXZdtTe",
+   "role": "tool",
+   "content": "[{\"id\": \"979b0ae0-4532-468f-9891-a2c2b12fe8b8\", \"first_name\": \"Alex\", \"last_name\": \"Thompson\", \"email\": null, \"phone\": null, \"job_title\": \"Founder\", \"company_id\": \"8d7bbe3c-c268-4e53-bcbd-42a2a4334d7c\", \"lead_score\": 0, \"relationship_stage\": \"prospect\", \"trust_level\": 50, \"commitment_level\": 0}]",
+   "requestor": "assistant",
+   "error": false,
+   "turn_idx": 3,
+   "timestamp": "2026-11-20T00:32:31.291548"
+  },
+  {
+   "role": "assistant",
+   "content": "Great! I found your record. I can see you're Alex Thompson, currently listed as \"Founder\" at Success LLC. Now let me create the referral opportunity for you.\n\nI'll create the opportunity named 'Success LLC Referral' linked to your person ID:\n\n",
+   "tool_calls": [
+    {
+     "id": "sE6zhu5GLdaHg2wJwMXFX06jZ4SYVTII",
+     "name": "create_opportunity",
+     "arguments": {
+      "name": "Success LLC Referral",
+      "person_id": "979b0ae0-4532-468f-9891-a2c2b12fe8b8"
+     },
+     "requestor": "assistant"
+    }
+   ],
+   "is_audio": false,
+   "turn_idx": 4,
+   "timestamp": "2026-11-20T00:32:32.818192",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 129,
+    "prompt_tokens": 4978
+   },
+   "raw_data": {
+    "id": "chatcmpl-OWjuqTWv5Y3SfthBJuBfjJu1Y4ZwEAMC",
+    "created": 1795131153,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "tool_calls",
+      "index": 0,
+      "message": {
+       "content": "Great! I found your record. I can see you're Alex Thompson, currently listed as \"Founder\" at Success LLC. Now let me create the referral opportunity for you.\n\nI'll create the opportunity named 'Success LLC Referral' linked to your person ID:\n\n",
+       "role": "assistant",
+       "tool_calls": [
+        {
+         "function": {
+          "arguments": "{\"name\":\"Success LLC Referral\",\"person_id\":\"979b0ae0-4532-468f-9891-a2c2b12fe8b8\"}",
+          "name": "create_opportunity"
+         },
+         "id": "sE6zhu5GLdaHg2wJwMXFX06jZ4SYVTII",
+         "type": "function"
+        }
+       ],
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 129,
+     "prompt_tokens": 4978,
+     "total_tokens": 5107,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 4822
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 4822,
+     "prompt_n": 156,
+     "prompt_ms": 77.194,
+     "prompt_per_token_ms": 0.49483333333333335,
+     "prompt_per_second": 2020.8824520040416,
+     "predicted_n": 129,
+     "predicted_ms": 1414.33,
+     "predicted_per_token_ms": 11.049453125,
+     "predicted_per_second": 90.50221659725807
+    }
+   },
+   "generation_time_seconds": 1.5210662470199168,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "id": "sE6zhu5GLdaHg2wJwMXFX06jZ4SYVTII",
+   "role": "tool",
+   "content": "{\"id\": \"0862b615-9342-4355-8beb-0e0decca37c7\", \"name\": \"Success LLC Referral\", \"person_id\": \"979b0ae0-4532-468f-9891-a2c2b12fe8b8\", \"company_id\": null, \"stage\": \"NEW\", \"value\": null, \"probability\": 0.1, \"expected_close_date\": null}",
+   "requestor": "assistant",
+   "error": false,
+   "turn_idx": 5,
+   "timestamp": "2026-11-20T00:32:32.883303"
+  },
+  {
+   "role": "assistant",
+   "content": "Perfect! I've successfully created the referral opportunity \"Success LLC Referral\" for you. Here are the details:\n\n- **Opportunity ID**: 0862b615-9342-4355-8beb-0e0decca37c7\n- **Name**: Success LLC Referral\n- **Stage**: NEW\n- **Associated with**: Alex Thompson (your record)\n\nThe opportunity has been created with the default stage \"NEW\" and a probability of 0.1 (10%). As you move through the referral process and make progress, you can update the stage using the `update_opportunity_stage` function.\n\nIs there anything else you'd like me to help you with regarding the referral program or your CRM account?",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 6,
+   "timestamp": "2026-11-20T00:32:34.783981",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 163,
+    "prompt_tokens": 5240
+   },
+   "raw_data": {
+    "id": "chatcmpl-0Gzz5WBJQPVIsEUybuDoOoFDSrwV3G0u",
+    "created": 1795131155,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "Perfect! I've successfully created the referral opportunity \"Success LLC Referral\" for you. Here are the details:\n\n- **Opportunity ID**: 0862b615-9342-4355-8beb-0e0decca37c7\n- **Name**: Success LLC Referral\n- **Stage**: NEW\n- **Associated with**: Alex Thompson (your record)\n\nThe opportunity has been created with the default stage \"NEW\" and a probability of 0.1 (10%). As you move through the referral process and make progress, you can update the stage using the `update_opportunity_stage` function.\n\nIs there anything else you'd like me to help you with regarding the referral program or your CRM account?",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 163,
+     "prompt_tokens": 5240,
+     "total_tokens": 5403,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 5106
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 5106,
+     "prompt_n": 134,
+     "prompt_ms": 74.892,
+     "prompt_per_token_ms": 0.5588955223880596,
+     "prompt_per_second": 1789.2431768413182,
+     "predicted_n": 163,
+     "predicted_ms": 1788.263,
+     "predicted_per_token_ms": 11.03866049382716,
+     "predicted_per_second": 90.59070170327296
+    }
+   },
+   "generation_time_seconds": 1.8947881232015789,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "user",
+   "content": "That's great news, thank you! I'm glad the opportunity is set up. Since I'm already an existing user, I just wanted to confirm that this new record is linked to my current account so I don't need to create a duplicate lead.\n\nBefore I start reaching out to my colleagues, could you briefly explain how the referral process works once I introduce them? Specifically, how do I track their progress or convert them into actual users?",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 7,
+   "timestamp": "2026-11-20T00:32:35.984837",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 91,
+    "prompt_tokens": 726
+   },
+   "raw_data": {
+    "id": "chatcmpl-3GoS3ZZ9h2KxfNeadQn5Z9v3pawq4lmB",
+    "created": 1795131156,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "That's great news, thank you! I'm glad the opportunity is set up. Since I'm already an existing user, I just wanted to confirm that this new record is linked to my current account so I don't need to create a duplicate lead.\n\nBefore I start reaching out to my colleagues, could you briefly explain how the referral process works once I introduce them? Specifically, how do I track their progress or convert them into actual users?",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 91,
+     "prompt_tokens": 726,
+     "total_tokens": 817,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 552
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 552,
+     "prompt_n": 174,
+     "prompt_ms": 85.929,
+     "prompt_per_token_ms": 0.4938448275862069,
+     "prompt_per_second": 2024.92755647104,
+     "predicted_n": 91,
+     "predicted_ms": 996.157,
+     "predicted_per_token_ms": 11.06841111111111,
+     "predicted_per_second": 90.34720430614854
+    }
+   },
+   "generation_time_seconds": null,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "assistant",
+   "content": "You're welcome! I'm glad the opportunity is set up correctly. Let me clarify how the referral process works in our CRM system:\n\nWhen you introduce your colleagues to our CRM, here's how the process typically flows:\n\n1. **Initial Contact**: When a colleague shows interest, you would create a person record for them using `create_person` with their name and contact information. This ensures they're properly tracked in the system.\n\n2. **Opportunity Creation**: Once they express interest in using the CRM, you can create an opportunity record (like we just did for you) using `create_opportunity`, linking it to their person ID.\n\n3. **Tracking Progress**: As you work with them through the sales pipeline, you can:\n   - Update the opportunity stage using `update_opportunity_stage` (e.g., from \"NEW\" to \"qualified\", \"proposal\", \"negotiation\", etc.)\n   - Monitor their relationship metrics using `get_relationship_metrics` to see their trust_level, commitment_level, and lead_score\n   - Create tasks using `create_task` to track follow-up activities\n\n4. **Conversion**: When they become actual users, you can:\n   - Update their relationship_stage to reflect their new status\n   - Adjust their trust_level and commitment_level based on their engagement\n   - Create additional opportunities for upsells or renewals\n\nThe key is to build trust through reliable interactions and strengthen commitment by demonstrating value. The system helps you track these metrics so you can make informed decisions about how to move each relationship forward.\n\nWould you like me to help you create a person record for one of your colleagues to demonstrate the process, or do you have any other questions about the referral workflow?",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 8,
+   "timestamp": "2026-11-20T00:32:40.265960",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 354,
+    "prompt_tokens": 5494
+   },
+   "raw_data": {
+    "id": "chatcmpl-8dsM35wWthOkURm0IzqCE33kJh9GTpoi",
+    "created": 1795131160,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "You're welcome! I'm glad the opportunity is set up correctly. Let me clarify how the referral process works in our CRM system:\n\nWhen you introduce your colleagues to our CRM, here's how the process typically flows:\n\n1. **Initial Contact**: When a colleague shows interest, you would create a person record for them using `create_person` with their name and contact information. This ensures they're properly tracked in the system.\n\n2. **Opportunity Creation**: Once they express interest in using the CRM, you can create an opportunity record (like we just did for you) using `create_opportunity`, linking it to their person ID.\n\n3. **Tracking Progress**: As you work with them through the sales pipeline, you can:\n   - Update the opportunity stage using `update_opportunity_stage` (e.g., from \"NEW\" to \"qualified\", \"proposal\", \"negotiation\", etc.)\n   - Monitor their relationship metrics using `get_relationship_metrics` to see their trust_level, commitment_level, and lead_score\n   - Create tasks using `create_task` to track follow-up activities\n\n4. **Conversion**: When they become actual users, you can:\n   - Update their relationship_stage to reflect their new status\n   - Adjust their trust_level and commitment_level based on their engagement\n   - Create additional opportunities for upsells or renewals\n\nThe key is to build trust through reliable interactions and strengthen commitment by demonstrating value. The system helps you track these metrics so you can make informed decisions about how to move each relationship forward.\n\nWould you like me to help you create a person record for one of your colleagues to demonstrate the process, or do you have any other questions about the referral workflow?",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 354,
+     "prompt_tokens": 5494,
+     "total_tokens": 5848,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 4728
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 4728,
+     "prompt_n": 766,
+     "prompt_ms": 231.694,
+     "prompt_per_token_ms": 0.30247258485639683,
+     "prompt_per_second": 3306.0847497129835,
+     "predicted_n": 354,
+     "predicted_ms": 3947.995,
+     "predicted_per_token_ms": 11.184121813031162,
+     "predicted_per_second": 89.41247392663873
+    }
+   },
+   "generation_time_seconds": 4.275152806658298,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "user",
+   "content": "That's very helpful, thank you! I think I have a good grasp of the workflow now. I'll make sure to create a person record for each colleague before moving them into the opportunity pipeline.\n\nI'm all set on my end to start reaching out to my team. Thanks again for setting up the 'Success LLC Referral' opportunity and walking me through the process. I'll let you know if I run into any issues as I get started.",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 9,
+   "timestamp": "2026-11-20T00:32:41.561816",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 93,
+    "prompt_tokens": 1179
+   },
+   "raw_data": {
+    "id": "chatcmpl-z537h9dNsH76oU2BYRxM1MfUKRUDMnrD",
+    "created": 1795131162,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "That's very helpful, thank you! I think I have a good grasp of the workflow now. I'll make sure to create a person record for each colleague before moving them into the opportunity pipeline.\n\nI'm all set on my end to start reaching out to my team. Thanks again for setting up the 'Success LLC Referral' opportunity and walking me through the process. I'll let you know if I run into any issues as I get started.",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 93,
+     "prompt_tokens": 1179,
+     "total_tokens": 1272,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 722
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 722,
+     "prompt_n": 457,
+     "prompt_ms": 158.952,
+     "prompt_per_token_ms": 0.34781619256017504,
+     "prompt_per_second": 2875.081785696311,
+     "predicted_n": 93,
+     "predicted_ms": 1019.792,
+     "predicted_per_token_ms": 11.084695652173913,
+     "predicted_per_second": 90.21447510864961
+    }
+   },
+   "generation_time_seconds": null,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "assistant",
+   "content": "You're very welcome, Alex! I'm glad I could help set up your referral opportunity and explain the workflow. \n\nYou're all set to start reaching out to your team. Remember to:\n- Create person records for each colleague before adding them to the opportunity pipeline\n- Track their progress through the stages using the opportunity stage updates\n- Monitor their relationship metrics to guide your engagement strategy\n\nFeel free to reach out anytime if you need assistance with creating records, updating stages, or anything else related to your referral process. Good luck with your referrals, and I look forward to hearing about your success!",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 10,
+   "timestamp": "2026-11-20T00:32:43.222086",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 122,
+    "prompt_tokens": 5949
+   },
+   "raw_data": {
+    "id": "chatcmpl-T1OSmaycBRYbdAymzKaLZg5LVxszBkMV",
+    "created": 1795131163,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "You're very welcome, Alex! I'm glad I could help set up your referral opportunity and explain the workflow. \n\nYou're all set to start reaching out to your team. Remember to:\n- Create person records for each colleague before adding them to the opportunity pipeline\n- Track their progress through the stages using the opportunity stage updates\n- Monitor their relationship metrics to guide your engagement strategy\n\nFeel free to reach out anytime if you need assistance with creating records, updating stages, or anything else related to your referral process. Good luck with your referrals, and I look forward to hearing about your success!",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 122,
+     "prompt_tokens": 5949,
+     "total_tokens": 6071,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 5490
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 5490,
+     "prompt_n": 459,
+     "prompt_ms": 161.39,
+     "prompt_per_token_ms": 0.3516122004357298,
+     "prompt_per_second": 2844.042381808043,
+     "predicted_n": 122,
+     "predicted_ms": 1377.063,
+     "predicted_per_token_ms": 11.380685950413223,
+     "predicted_per_second": 87.86816579924084
+    }
+   },
+   "generation_time_seconds": 1.65337899280712,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  },
+  {
+   "role": "user",
+   "content": "###STOP###",
+   "tool_calls": null,
+   "is_audio": false,
+   "turn_idx": 11,
+   "timestamp": "2026-11-20T00:32:43.510999",
+   "cost": 0.0,
+   "usage": {
+    "completion_tokens": 4,
+    "prompt_tokens": 1402
+   },
+   "raw_data": {
+    "id": "chatcmpl-W45gFzw7IkvMubHtKIZeNpyzimNIe18r",
+    "created": 1795131164,
+    "model": "/work/Qwen/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+    "object": "chat.completion",
+    "system_fingerprint": "b10884-434ddbbc0",
+    "choices": [
+     {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+       "content": "###STOP###",
+       "role": "assistant",
+       "tool_calls": null,
+       "function_call": null,
+       "provider_specific_fields": {
+        "refusal": null
+       }
+      },
+      "provider_specific_fields": {}
+     }
+    ],
+    "usage": {
+     "completion_tokens": 4,
+     "prompt_tokens": 1402,
+     "total_tokens": 1406,
+     "completion_tokens_details": null,
+     "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 1175
+     }
+    },
+    "service_tier": null,
+    "timings": {
+     "cache_n": 1175,
+     "prompt_n": 227,
+     "prompt_ms": 117.829,
+     "prompt_per_token_ms": 0.5190704845814977,
+     "prompt_per_second": 1926.5206358366788,
+     "predicted_n": 4,
+     "predicted_ms": 37.005,
+     "predicted_per_token_ms": 12.335,
+     "predicted_per_second": 81.07012565869476
+    }
+   },
+   "generation_time_seconds": null,
+   "audio_format": null,
+   "audio_path": null,
+   "audio_script_gold": null,
+   "speech_effects": null,
+   "source_effects": null,
+   "channel_effects": null,
+   "turn_taking_action": null,
+   "utterance_ids": null,
+   "chunk_id": null,
+   "is_final_chunk": true,
+   "source": null,
+   "contains_speech": true
+  }
+ ],
+ "ticks": null,
+ "trial": null,
+ "seed": 4243,
+ "mode": "half_duplex",
+ "speech_environment": null,
+ "review": null,
+ "user_only_review": null,
+ "info": null,
+ "auth_classification": null,
+ "hallucination_retries_used": 0,
+ "hallucination_check": null,
+ "provider_session_id": null,
+ "policy": "# CRM Domain Policy - Commitment-Trust Theory Framework\n\n## Theory Background\nBased on Commitment-Trust Theory (Morgan & Hunt, 1994)\n- **Commitment**: Desire to maintain a valued relationship\n- **Trust**: Confidence in partner's reliability and integrity\n- Both are mutually reinforcing and critical for long-term success\n\n## Domain Overview\n\nThe CRM domain focuses on building and managing customer relationships through the Commitment-Trust framework. The system helps agents:\n- Assess relationship stages\n- Build trust through reliable interactions\n- Strengthen commitment through value delivery\n- Navigate the relationship lifecycle from prospect to loyal advocate\n\n## Key Relationship Metrics\n\nEach person has:\n- **trust_level** (0-100): Confidence in your reliability and integrity\n- **commitment_level** (0-100): Desire to maintain the relationship\n- **lead_score** (0-100): Sales readiness indicator\n- **relationship_stage**: Current phase (prospect, qualified, proposal, negotiation, closed-won, closed-lost, loyal, at-risk)\n\n## Communication Guidelines\n\n### General Rules\n1. Always assess the current relationship stage before proposing actions\n2. Focus on building trust through reliability, competence, and transparency\n3. Strengthen commitment by demonstrating long-term value\n4. Never promise what cannot be delivered\n5. Confirm facts before making claims\n6. One tool call per message, no simultaneous responses\n\n### Trust-Building Actions\n1. **Reliability**: Follow through on promises and commitments\n2. **Competence**: Demonstrate knowledge and expertise\n3. **Integrity**: Be honest and transparent\n4. **Caring**: Show genuine interest in customer success\n\n### Commitment-Strengthening Actions\n1. **Investment**: Show how you invest in their success\n2. **Customization**: Tailor solutions to their needs\n3. **Communication**: Regular, valuable updates\n4. **Support**: Proactive problem resolution\n\n## Relationship Stages\n\n### 1. Prospect (trust: 0-20, commitment: 0-20)\n- Initial contact, low awareness\n- Focus: Information sharing, needs assessment\n- Trust building through professional competence\n\n### 2. Qualified (trust: 20-40, commitment: 20-40)\n- Showing interest, evaluating options\n- Focus: Value proposition, addressing concerns\n- Build trust through reliability and transparency\n\n### 3. Proposal (trust: 40-60, commitment: 40-60)\n- Evaluating specific solution\n- Focus: Demonstrating fit, handling objections\n- Strengthen commitment through tailored solutions\n\n### 4. Negotiation (trust: 60-80, commitment: 60-80)\n- Terms discussion, final evaluation\n- Focus: Mutual benefit, closing gaps\n- Reinforce trust through fairness and flexibility\n\n### 5. Closed-Won (trust: 80-100, commitment: 80-100)\n- Agreement reached, onboarding\n- Focus: Smooth transition, setting expectations\n- Transition to long-term relationship\n\n### 6. Loyal (trust: 90-100, commitment: 90-100)\n- Repeat business, referrals\n- Focus: Value enhancement, advocacy\n- Deepen commitment through exclusive benefits\n\n### 7. At-Risk (trust: <50, commitment: <50)\n- Declining engagement, complaints\n- Focus: Crisis management, relationship rescue\n- Rebuild trust through exceptional service\n\n## Tool Usage Protocol\n\n1. **Assessment First**: Always check current relationship metrics\n2. **Context-Aware**: Reference previous interactions when available\n3. **Progressive**: Move relationships forward incrementally\n4. **Measurable**: Track changes in trust and commitment levels\n\n## CRM Logging Guidelines\n\nLog records in the CRM as soon as you agree to do so \u2014 do not defer to the end of the conversation.\n\n1. **Lead record**: When a customer asks to be recorded as a lead, call `create_person` with their name (and company if known). Create the person first so you have their ID for later steps.\n2. **Opportunity record**: When a customer asks for an opportunity (pilot, trial, referral, renewal, upsell, churn-risk, etc.), call `create_opportunity` linked to that person's ID.\n3. **Trust/commitment signals**: Record relationship signals in the CRM. If the customer is skeptical or distrustful, lower their trust via `update_person_trust_commitment`. If they show strong commitment, raise it accordingly.\n4. **Stage changes**: When a relationship advances (e.g. resolving a problem, moving toward a deal), call `update_opportunity_stage` to reflect it (for example \"problem-resolution\").\n5. **Verify before creating**: Prefer `find_people` / `find_companies` to check for existing records before creating duplicates.\n\n## Transfer to Human Agent\n\nTransfer when:\n- Request violates policy or ethical standards\n- Technical capability beyond available tools\n- Customer requests specific human representative\n- Escalation needed for relationship rescue\n- Legal or compliance issues arise\n\n## Core Commitment-Trust Strategies\n\n### For Low Trust/Commitment (New Prospects)\n- Focus on competence demonstration\n- Provide social proof and references\n- Set and meet small commitments\n- Be transparent about processes\n\n### For Medium Trust/Commitment (Qualified Leads)\n- Build reliability through consistent communication\n- Address concerns proactively\n- Show how you invest in their success\n- Share relevant case studies\n\n### For High Trust/Commitment (Loyal Customers)\n- Leverage relationship for referrals\n- Offer exclusive benefits\n- Co-create solutions\n- Celebrate mutual successes\n\n## Success Metrics\n\n- **Short-term**: Trust increase, commitment increase, stage progression\n- **Medium-term**: Conversion rate, opportunity value, cycle time\n- **Long-term**: Customer lifetime value, retention rate, referral rate\n\n## Important Notes\n\n1. Trust builds slowly but can be lost quickly\n2. Commitment follows trust - don't push for commitment before trust exists\n3. Each relationship is unique - adapt approach to customer profile\n4. Track relationship history for continuity\n5. Use the relationship metrics tools to guide your strategy\n",
+ "effect_timeline": null
+}

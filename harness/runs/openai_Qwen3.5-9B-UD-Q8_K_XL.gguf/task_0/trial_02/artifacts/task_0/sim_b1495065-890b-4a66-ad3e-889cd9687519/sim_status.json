@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "reason": "infrastructure_error",
+  "error": "litellm.ServiceUnavailableError: ServiceUnavailableError: OpenAIException - Loading model",
+  "error_type": "ServiceUnavailableError"
+}

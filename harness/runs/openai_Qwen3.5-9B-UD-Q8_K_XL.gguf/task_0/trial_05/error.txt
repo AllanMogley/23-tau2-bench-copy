@@ -1,0 +1,6 @@
+Reset reported a dirty state; before={'tasks': 0, 'opportunities': 6, 'people': 5, 'companies': 5}
+
+Traceback (most recent call last):
+  File "/workspace/tau2-bench/harness/run_trials.py", line 123, in main
+    raise RuntimeError(
+RuntimeError: Reset reported a dirty state; before={'tasks': 0, 'opportunities': 6, 'people': 5, 'companies': 5}

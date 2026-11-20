@@ -1,0 +1,58 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "7",
+ "trial": 2,
+ "seed": 4243,
+ "user_seed": 9243,
+ "agent_args": {
+  "seed": 4243,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9243,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "8d7bbe3c-c268-4e53-bcbd-42a2a4334d7c": {
+    "id": "8d7bbe3c-c268-4e53-bcbd-42a2a4334d7c",
+    "name": "Success LLC",
+    "industry": "Consulting",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {
+   "979b0ae0-4532-468f-9891-a2c2b12fe8b8": {
+    "id": "979b0ae0-4532-468f-9891-a2c2b12fe8b8",
+    "first_name": "Alex",
+    "last_name": "Thompson",
+    "email": null,
+    "phone": null,
+    "job_title": "Founder",
+    "company_id": "8d7bbe3c-c268-4e53-bcbd-42a2a4334d7c",
+    "lead_score": 0,
+    "relationship_stage": "prospect",
+    "trust_level": 50,
+    "commitment_level": 0
+   }
+  },
+  "opportunities": {},
+  "tasks": {}
+ }
+}

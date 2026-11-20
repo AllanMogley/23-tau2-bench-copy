@@ -1,0 +1,69 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "9",
+ "trial": 7,
+ "seed": 4248,
+ "user_seed": 9248,
+ "agent_args": {
+  "seed": 4248,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9248,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "1c19fa72-e1f7-48d2-a0fc-f988d5e5e14b": {
+    "id": "1c19fa72-e1f7-48d2-a0fc-f988d5e5e14b",
+    "name": "Transition Corp",
+    "industry": "Energy",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {
+   "f799ccfa-56de-4ccd-b0ab-80ff2e226ac4": {
+    "id": "f799ccfa-56de-4ccd-b0ab-80ff2e226ac4",
+    "first_name": "Chris",
+    "last_name": "Martinez",
+    "email": null,
+    "phone": null,
+    "job_title": "Director",
+    "company_id": "1c19fa72-e1f7-48d2-a0fc-f988d5e5e14b",
+    "lead_score": 0,
+    "relationship_stage": "prospect",
+    "trust_level": 50,
+    "commitment_level": 0
+   }
+  },
+  "opportunities": {
+   "f5ce73a6-973d-43de-863a-1227baf18a5c": {
+    "id": "f5ce73a6-973d-43de-863a-1227baf18a5c",
+    "name": "Transition Corp Subscription",
+    "person_id": "f799ccfa-56de-4ccd-b0ab-80ff2e226ac4",
+    "company_id": "1c19fa72-e1f7-48d2-a0fc-f988d5e5e14b",
+    "stage": "SCREENING",
+    "value": null,
+    "probability": 0.1,
+    "expected_close_date": null
+   }
+  },
+  "tasks": {}
+ }
+}

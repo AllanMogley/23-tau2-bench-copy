@@ -1,0 +1,69 @@
+{
+ "model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "user_model": "openai/Qwen3.5-9B-UD-Q8_K_XL.gguf",
+ "task_id": "6",
+ "trial": 5,
+ "seed": 4246,
+ "user_seed": 9246,
+ "agent_args": {
+  "seed": 4246,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "user_args": {
+  "seed": 9246,
+  "temperature": 0.0,
+  "timeout": 120,
+  "max_tokens": 4096,
+  "extra_body": {
+   "chat_template_kwargs": {
+    "enable_thinking": false
+   }
+  }
+ },
+ "fixtures": {
+  "companies": {
+   "f47def3b-80ca-4639-a2db-0f2c03842b2e": {
+    "id": "f47def3b-80ca-4639-a2db-0f2c03842b2e",
+    "name": "Innovate Inc",
+    "industry": "Healthcare",
+    "annual_revenue": null,
+    "employee_count": null
+   }
+  },
+  "people": {
+   "96e068db-f3b1-436c-8cfd-c3b0fd9694bf": {
+    "id": "96e068db-f3b1-436c-8cfd-c3b0fd9694bf",
+    "first_name": "Maria",
+    "last_name": "Garcia",
+    "email": null,
+    "phone": null,
+    "job_title": "COO",
+    "company_id": "f47def3b-80ca-4639-a2db-0f2c03842b2e",
+    "lead_score": 0,
+    "relationship_stage": "prospect",
+    "trust_level": 50,
+    "commitment_level": 0
+   }
+  },
+  "opportunities": {
+   "5bc9f6c4-15af-4f56-8629-4f4b2e7b1aa9": {
+    "id": "5bc9f6c4-15af-4f56-8629-4f4b2e7b1aa9",
+    "name": "Innovate Onboarding",
+    "person_id": "96e068db-f3b1-436c-8cfd-c3b0fd9694bf",
+    "company_id": "f47def3b-80ca-4639-a2db-0f2c03842b2e",
+    "stage": "NEW",
+    "value": null,
+    "probability": 0.1,
+    "expected_close_date": null
+   }
+  },
+  "tasks": {}
+ }
+}
