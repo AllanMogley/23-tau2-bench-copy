@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import os
 import shutil
 import sys
 import traceback
@@ -47,6 +48,71 @@ def parse_json_arg(value: str | None) -> dict:
     if not value:
         return {}
     return json.loads(value)
+
+
+def load_env_file(path: Path) -> None:
+    """Load KEY=VALUE pairs without overriding the current environment."""
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export ") :]
+        if "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        os.environ.setdefault(key, value)
+
+
+def first_env(*keys: str) -> str | None:
+    for key in keys:
+        value = os.environ.get(key)
+        if value:
+            return value
+    return None
+
+
+def apply_base_urls(
+    models: list[str],
+    user_model: str,
+    agent_args: dict,
+    user_args: dict,
+    env_file: Path,
+) -> None:
+    """Fill api_base/api_key from repo .env when not passed explicitly."""
+    if not agent_args.get("api_base"):
+        if models and all(model == user_model for model in models):
+            base = first_env("LLAMA_USER_BASE_URL", "OPENAI_BASE_URL")
+        else:
+            base = first_env("LLAMA_AGENT_BASE_URL")
+        if not base:
+            raise SystemExit(
+                "No agent api_base. Pass it in --agent-args or add "
+                f"LLAMA_AGENT_BASE_URL to {env_file}"
+            )
+        agent_args["api_base"] = base
+
+    if not user_args.get("api_base"):
+        base = first_env("LLAMA_USER_BASE_URL", "OPENAI_BASE_URL")
+        if not base:
+            raise SystemExit(
+                "No user api_base. Pass it in --user-args or add "
+                f"LLAMA_USER_BASE_URL to {env_file}"
+            )
+        user_args["api_base"] = base
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if api_key:
+        agent_args.setdefault("api_key", api_key)
+        user_args.setdefault("api_key", api_key)
 
 
 def main() -> None:
@@ -83,6 +149,8 @@ def main() -> None:
     args = parser.parse_args()
 
     repo = args.repo.resolve()
+    env_file = repo / ".env"
+    load_env_file(env_file)
 
     tasks = {str(t["id"]): t for t in json.loads(args.tasks.read_text())}
     fixtures = json.loads(args.fixtures.read_text())
@@ -95,10 +163,14 @@ def main() -> None:
 
     agent_args = parse_json_arg(args.agent_args)
     user_args = parse_json_arg(args.user_args)
+    if not args.dry_run:
+        apply_base_urls(models, args.user_model, agent_args, user_args, env_file)
 
     print(f"Tasks: {task_ids}")
     print(f"Models: {models}")
     print(f"Trials per task: {args.trials}")
+    print(f"Agent api_base: {agent_args.get('api_base')}")
+    print(f"User api_base: {user_args.get('api_base')}")
 
     if args.dry_run:
         for model in models:
