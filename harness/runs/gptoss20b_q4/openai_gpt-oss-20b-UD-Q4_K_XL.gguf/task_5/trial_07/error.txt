@@ -1,0 +1,15 @@
+MCP tasks find failed: Failed to find task records
+
+Traceback (most recent call last):
+  File "/workspace/tau2-bench/harness/run_trials.py", line 230, in main
+    if reset_twenty(
+       ^^^^^^^^^^^^^
+  File "/workspace/tau2-bench/harness/reset_twenty.py", line 108, in reset
+    deleted = client.reset()
+              ^^^^^^^^^^^^^^
+  File "/workspace/tau2-bench/harness/twenty_mcp.py", line 217, in reset
+    records = self.find_all(object_name)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tau2-bench/harness/twenty_mcp.py", line 204, in find_all
+    raise RuntimeError(
+RuntimeError: MCP tasks find failed: Failed to find task records
