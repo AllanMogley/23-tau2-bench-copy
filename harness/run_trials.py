@@ -30,6 +30,7 @@ import os
 import shutil
 import sys
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -80,25 +81,91 @@ def first_env(*keys: str) -> str | None:
     return None
 
 
+PROVIDER_KEY_ENV = {
+    "deepseek": "DEEPSEEK_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+    "together_ai": "TOGETHER_API_KEY",
+}
+
+SECRET_HINTS = ("key", "token", "secret", "authorization", "password")
+
+# Local llama.cpp models are addressed with the openai/ prefix. Any other
+# provider prefix is treated as a remote API and left to LiteLLM.
+LOCAL_MODEL_PREFIX = "openai/"
+
+
+def model_provider(model: str) -> str:
+    return model.split("/", 1)[0] if "/" in model else ""
+
+
+def redact(value, key: str = ""):
+    """Recursively mask secret-looking values before they are written to disk."""
+    if isinstance(value, dict):
+        return {k: redact(v, k) for k, v in value.items()}
+    if isinstance(value, list):
+        return [redact(v, key) for v in value]
+    if any(hint in key.lower() for hint in SECRET_HINTS):
+        if isinstance(value, str) and value in ("", "no_key_required", "local", "***"):
+            return value
+        return "***" if value else value
+    return value
+
+
+def scrub(text: str) -> str:
+    """Remove any known provider key from text destined for logs."""
+    for name in set(PROVIDER_KEY_ENV.values()):
+        value = os.environ.get(name)
+        if value and len(value) >= 8:
+            text = text.replace(value, "***")
+    return text
+
+
 def apply_base_urls(
     models: list[str],
     user_model: str,
     agent_args: dict,
     user_args: dict,
     env_file: Path,
+    agent_mode: str = "auto",
 ) -> None:
-    """Fill api_base/api_key from repo .env when not passed explicitly."""
-    if not agent_args.get("api_base"):
-        if models and all(model == user_model for model in models):
-            base = first_env("LLAMA_USER_BASE_URL", "OPENAI_BASE_URL")
+    """Fill api_base/api_key for local models; leave remote models to LiteLLM.
+
+    Local llama.cpp agents keep the openai/ prefix and are filled from .env as
+    before. Provider-prefixed models (e.g. deepseek/deepseek-chat) keep no
+    api_base/api_key here; LiteLLM reads the provider key from the environment.
+    """
+    explicit_base = bool(agent_args.get("api_base"))
+    if agent_mode == "local":
+        local_agent = True
+    elif agent_mode == "remote":
+        local_agent = False
+    else:
+        local_agent = not explicit_base and all(
+            model.startswith(LOCAL_MODEL_PREFIX) for model in models
+        )
+
+    if not explicit_base:
+        if local_agent:
+            if models and all(model == user_model for model in models):
+                base = first_env("LLAMA_USER_BASE_URL", "OPENAI_BASE_URL")
+            else:
+                base = first_env("LLAMA_AGENT_BASE_URL")
+            if not base:
+                raise SystemExit(
+                    "No agent api_base. Pass it in --agent-args or add "
+                    f"LLAMA_AGENT_BASE_URL to {env_file}"
+                )
+            agent_args["api_base"] = base
         else:
-            base = first_env("LLAMA_AGENT_BASE_URL")
-        if not base:
-            raise SystemExit(
-                "No agent api_base. Pass it in --agent-args or add "
-                f"LLAMA_AGENT_BASE_URL to {env_file}"
-            )
-        agent_args["api_base"] = base
+            provider = model_provider(models[0]) if models else ""
+            env_name = PROVIDER_KEY_ENV.get(provider)
+            if env_name and not os.environ.get(env_name):
+                raise SystemExit(
+                    f"Remote agent model {models[0]!r} needs {env_name}. "
+                    f"Add it to {env_file} or the environment."
+                )
 
     if not user_args.get("api_base"):
         base = first_env("LLAMA_USER_BASE_URL", "OPENAI_BASE_URL")
@@ -111,7 +178,8 @@ def apply_base_urls(
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if api_key:
-        agent_args.setdefault("api_key", api_key)
+        if local_agent:
+            agent_args.setdefault("api_key", api_key)
         user_args.setdefault("api_key", api_key)
 
 
@@ -125,6 +193,22 @@ def main() -> None:
     parser.add_argument("--user-model", required=True)
     parser.add_argument("--agent-args", default=None, help="JSON dict for llm_args_agent")
     parser.add_argument("--user-args", default=None, help="JSON dict for llm_args_user")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--agent-local",
+        action="store_const",
+        const="local",
+        dest="agent_mode",
+        help="force local llama.cpp endpoint (ignore model prefix)",
+    )
+    mode.add_argument(
+        "--agent-remote",
+        action="store_const",
+        const="remote",
+        dest="agent_mode",
+        help="force remote provider endpoint (ignore model prefix)",
+    )
+    parser.set_defaults(agent_mode="auto")
     parser.add_argument("--trials", type=int, default=8)
     parser.add_argument("--task-ids", default=None, help="comma-separated task ids")
     parser.add_argument("--seed-base", type=int, default=4242)
@@ -164,12 +248,21 @@ def main() -> None:
     agent_args = parse_json_arg(args.agent_args)
     user_args = parse_json_arg(args.user_args)
     if not args.dry_run:
-        apply_base_urls(models, args.user_model, agent_args, user_args, env_file)
+        apply_base_urls(
+            models,
+            args.user_model,
+            agent_args,
+            user_args,
+            env_file,
+            agent_mode=args.agent_mode,
+        )
 
+    provider = model_provider(models[0]) or "local"
     print(f"Tasks: {task_ids}")
     print(f"Models: {models}")
+    print(f"Agent mode: {args.agent_mode} (provider={provider})")
     print(f"Trials per task: {args.trials}")
-    print(f"Agent api_base: {agent_args.get('api_base')}")
+    print(f"Agent api_base: {agent_args.get('api_base') or '<provider default>'}")
     print(f"User api_base: {user_args.get('api_base')}")
 
     if args.dry_run:
@@ -311,17 +404,28 @@ def main() -> None:
                     (run_dir / "simulation.json").write_text(
                         json.dumps(simulation.model_dump(mode="json"), indent=1)
                     )
+                    provider = model_provider(model) or "local"
+                    key_env = PROVIDER_KEY_ENV.get(provider)
+                    key_present = bool(
+                        (os.environ.get(key_env) if key_env else None)
+                        or os.environ.get("OPENAI_API_KEY")
+                    )
                     (run_dir / "meta.json").write_text(
                         json.dumps(
                             {
                                 "model": model,
                                 "user_model": args.user_model,
+                                "provider": provider,
+                                "api_key_present": key_present,
+                                "timestamp_utc": datetime.now(
+                                    timezone.utc
+                                ).isoformat(),
                                 "task_id": task_id,
                                 "trial": trial + 1,
                                 "seed": seed,
                                 "user_seed": user_seed,
-                                "agent_args": agent_llm_args,
-                                "user_args": user_llm_args,
+                                "agent_args": redact(agent_llm_args),
+                                "user_args": redact(user_llm_args),
                                 "fixtures": agent_data,
                             },
                             indent=1,
@@ -335,9 +439,9 @@ def main() -> None:
 
                 except Exception as exc:
                     failures += 1
-                    print(f"FAILED: {exc}")
+                    print(f"FAILED: {scrub(str(exc))}")
                     (run_dir / "error.txt").write_text(
-                        f"{exc}\n\n{traceback.format_exc()}"
+                        scrub(f"{exc}\n\n{traceback.format_exc()}")
                     )
 
     print(f"\nDone. Failures: {failures}")
