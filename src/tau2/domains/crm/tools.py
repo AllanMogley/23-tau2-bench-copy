@@ -2,6 +2,7 @@
 
 import os
 import json
+import time
 import requests
 from loguru import logger
 from typing import Optional
@@ -36,6 +37,17 @@ class CRMMCPTools(ToolKitBase):
         
         # Load credentials from tau2-bench-copy/.env file
         self.mcp_url, self.mcp_token = self._load_mcp_credentials()
+
+        # Twenty limits find_many_* to 100 calls per 60s. Pace and retry so a
+        # rate-limited read is not scored as a model tool error.
+        self._last_mcp_call = 0.0
+        self._mcp_min_interval = float(
+            os.environ.get("TWENTY_MIN_INTERVAL", 0.7)
+        )
+        self._mcp_max_retries = int(
+            os.environ.get("TWENTY_MAX_RETRIES", 5)
+        )
+        self._mcp_retry_wait = int(os.environ.get("TWENTY_RETRY_WAIT", 60))
 
         if not self.mcp_token or not self.mcp_url:
             raise ValueError(
@@ -112,19 +124,55 @@ class CRMMCPTools(ToolKitBase):
             "id": 1
         }
         
-        response = requests.post(
-            self.mcp_url, json=payload, headers=headers, timeout=120
-        )
-        response.raise_for_status()
-        
-        result = response.json()
-        
-        # Parse the nested JSON response
-        if "result" in result and "content" in result["result"]:
-            text_content = result["result"]["content"][0]["text"]
-            return json.loads(text_content)
-        
-        return result
+        parsed: object = {}
+        for attempt in range(1, self._mcp_max_retries + 1):
+            wait = self._mcp_min_interval - (
+                time.monotonic() - self._last_mcp_call
+            )
+            if wait > 0:
+                time.sleep(wait)
+
+            response = requests.post(
+                self.mcp_url, json=payload, headers=headers, timeout=120
+            )
+            self._last_mcp_call = time.monotonic()
+
+            retry_reason = None
+            if response.status_code == 429:
+                retry_reason = "HTTP 429"
+            else:
+                response.raise_for_status()
+
+                result = response.json()
+                parsed = result
+                if "result" in result and "content" in result["result"]:
+                    text_content = result["result"]["content"][0]["text"]
+                    try:
+                        parsed = json.loads(text_content)
+                    except json.JSONDecodeError:
+                        parsed = {"raw": text_content}
+
+                if (
+                    isinstance(parsed, dict)
+                    and parsed.get("success") is False
+                ):
+                    message = str(parsed.get("message") or "").lower()
+                    if "limit reached" in message:
+                        retry_reason = "rate limit"
+                    elif method_name.startswith("find_many_"):
+                        retry_reason = "find failure"
+
+            if retry_reason and attempt < self._mcp_max_retries:
+                logger.warning(
+                    f"MCP {retry_reason} on {method_name}; sleeping "
+                    f"{self._mcp_retry_wait}s "
+                    f"(attempt {attempt}/{self._mcp_max_retries})"
+                )
+                time.sleep(self._mcp_retry_wait)
+                continue
+            return parsed
+
+        return parsed
 
     @staticmethod
     def _map_stage(stage: str) -> str:

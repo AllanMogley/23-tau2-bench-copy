@@ -104,27 +104,52 @@ def reset(
     mcp_url, mcp_token = get_credentials(repo, url, token)
     client = MCPClient(mcp_url, mcp_token)
 
-    before = known_before if known_before is not None else client.clean_counts()
-    deleted = client.reset()
-    after = client.clean_counts()
+    if known_before is not None:
+        before = known_before
+    else:
+        try:
+            before = client.clean_counts()
+        except Exception as exc:
+            print("MCP before-count failed:", exc)
+            before = None
+
+    deleted: dict[str, int] = {}
+    after: dict[str, int] | None = None
+    try:
+        deleted = client.reset()
+        after = client.clean_counts()
+    except Exception as exc:
+        print("MCP reset failed:", exc)
 
     print("before:", before)
     print("deleted:", deleted)
-    print("after:", after)
 
+    if after is not None:
+        print("after:", after)
+        dirty = {k: v for k, v in after.items() if v != 0}
+        if not dirty:
+            print("OK: clean state.")
+            return 0
+        print("MCP reset left records:", dirty)
+    else:
+        print("MCP reset did not complete; falling back to SQL.")
+
+    if reset_sql(repo, db_url) != 0:
+        print("Hard SQL reset failed or no database URL is configured.")
+        return 1
+
+    try:
+        after = client.clean_counts()
+    except Exception as exc:
+        print("MCP after-count failed after SQL reset:", exc)
+        return 0
+
+    print("after SQL reset:", after)
     dirty = {k: v for k, v in after.items() if v != 0}
     if dirty:
-        print("MCP reset left records:", dirty)
-        if reset_sql(repo, db_url) != 0:
-            print("Hard SQL reset failed or no database URL is configured.")
-            return 1
-        after = client.clean_counts()
-        print("after SQL reset:", after)
-        dirty = {k: v for k, v in after.items() if v != 0}
-        if dirty:
-            print("WARNING: records remain after SQL reset:", dirty)
-            print("Restart Twenty if it caches records, then rerun.")
-            return 1
+        print("WARNING: records remain after SQL reset:", dirty)
+        print("Restart Twenty if it caches records, then rerun.")
+        return 1
     print("OK: clean state.")
     return 0
 

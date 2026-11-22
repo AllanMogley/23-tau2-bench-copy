@@ -224,7 +224,16 @@ def main() -> None:
                 print(f"\n=== {model} | T{task_id} | trial {trial + 1}/{args.trials} ===")
 
                 try:
-                    before = client.clean_counts()
+                    try:
+                        before = client.clean_counts()
+                    except Exception as exc:
+                        print("Pre-trial count failed; forcing reset:", exc)
+                        before = {
+                            "tasks": -1,
+                            "opportunities": -1,
+                            "people": -1,
+                            "companies": -1,
+                        }
                     if any(before.values()):
                         print("State is not clean before trial:", before)
                         if reset_twenty(

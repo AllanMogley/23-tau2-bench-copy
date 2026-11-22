@@ -109,6 +109,23 @@ def extract_records(response: Any) -> list[dict]:
     return walk(response)
 
 
+def _transient_error_reason(tool_name: str, parsed: Any) -> Optional[str]:
+    """Return a retry label for transient MCP failures, else None.
+
+    Twenty's rate limiter surfaces on find_many_* as a generic
+    "Failed to find <object> records", not "Limit reached", so retrying only
+    on the literal limit text misses it and aborts the trial.
+    """
+    if not isinstance(parsed, dict) or parsed.get("success") is not False:
+        return None
+    message = str(parsed.get("message") or "").lower()
+    if "limit reached" in message:
+        return "rate limit"
+    if tool_name.startswith("find_many_"):
+        return "find failure"
+    return None
+
+
 class MCPClient:
     def __init__(
         self,
@@ -162,33 +179,25 @@ class MCPClient:
             )
             self._last_call = time.monotonic()
 
-            if response.status_code == 429 and attempt < self.max_retries:
-                print(
-                    f"MCP HTTP 429 on {tool_name}; sleeping {self.retry_wait}s "
-                    f"(attempt {attempt}/{self.max_retries})"
-                )
-                time.sleep(self.retry_wait)
-                continue
-            response.raise_for_status()
+            retry_reason = None
+            if response.status_code == 429:
+                retry_reason = "HTTP 429"
+            else:
+                response.raise_for_status()
+                body = response.json()
+                parsed = body
+                if "result" in body and "content" in body["result"]:
+                    text = body["result"]["content"][0].get("text", "{}")
+                    try:
+                        parsed = json.loads(text)
+                    except json.JSONDecodeError:
+                        parsed = {"raw": text}
+                retry_reason = _transient_error_reason(tool_name, parsed)
 
-            body = response.json()
-            parsed = body
-            if "result" in body and "content" in body["result"]:
-                text = body["result"]["content"][0].get("text", "{}")
-                try:
-                    parsed = json.loads(text)
-                except json.JSONDecodeError:
-                    parsed = {"raw": text}
-
-            limited = (
-                isinstance(parsed, dict)
-                and parsed.get("success") is False
-                and "limit reached" in str(parsed.get("message", "")).lower()
-            )
-            if limited and attempt < self.max_retries:
+            if retry_reason and attempt < self.max_retries:
                 print(
-                    f"MCP rate limit on {tool_name}; sleeping {self.retry_wait}s "
-                    f"(attempt {attempt}/{self.max_retries})"
+                    f"MCP {retry_reason} on {tool_name}; sleeping "
+                    f"{self.retry_wait}s (attempt {attempt}/{self.max_retries})"
                 )
                 time.sleep(self.retry_wait)
                 continue
