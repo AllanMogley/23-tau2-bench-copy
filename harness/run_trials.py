@@ -89,7 +89,24 @@ PROVIDER_KEY_ENV = {
     "together_ai": "TOGETHER_API_KEY",
 }
 
-SECRET_HINTS = ("key", "token", "secret", "authorization", "password")
+SECRET_KEY_NAMES = {
+    "api_key",
+    "apikey",
+    "key",
+    "token",
+    "access_token",
+    "auth_token",
+    "secret",
+    "client_secret",
+    "authorization",
+    "password",
+}
+SECRET_KEY_SUFFIXES = ("_api_key", "_key", "_token", "_secret", "_password")
+
+
+def is_secret_name(name: str) -> bool:
+    lowered = name.lower()
+    return lowered in SECRET_KEY_NAMES or lowered.endswith(SECRET_KEY_SUFFIXES)
 
 # Local llama.cpp models are addressed with the openai/ prefix. Any other
 # provider prefix is treated as a remote API and left to LiteLLM.
@@ -106,7 +123,7 @@ def redact(value, key: str = ""):
         return {k: redact(v, k) for k, v in value.items()}
     if isinstance(value, list):
         return [redact(v, key) for v in value]
-    if any(hint in key.lower() for hint in SECRET_HINTS):
+    if is_secret_name(key):
         if isinstance(value, str) and value in ("", "no_key_required", "local", "***"):
             return value
         return "***" if value else value
