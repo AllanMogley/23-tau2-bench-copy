@@ -1,5 +1,8 @@
 CRM_INTEGRATION_GUIDE.md
 CRM_DOMAIN_SUMMARY.md
+src/tau2/domains/crm/__pycache__/tools.cpython-312.pyc
+src/tau2/runner/__pycache__/simulation.cpython-312.pyc
+
 *.tmp
 .DS_Store
 profile.json
